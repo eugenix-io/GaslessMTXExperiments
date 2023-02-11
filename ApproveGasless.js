@@ -27,8 +27,8 @@ const domainData = {
 async function main() {
     let abi = require('./abis/USDT.json');
 
-    // let provider = new ethers.JsonRpcProvider('https://rpc-mainnet.maticvigil.com/v1/07dd2bc161d12dd58aedb7d215054996d540c4b0');
-    // let provider = new ethers.JsonRpcProvider('https://thrilling-greatest-mansion.matic.discover.quiknode.pro/548cad00b00a5d861e033495255165a017febce0/');
+    // let provider = new ethers.JsonRpcProvider('<HTTPS RPC URL>');
+    // let provider = new ethers.JsonRpcProvider('<HTTPS RPC URL>');
 
     // let privateKeyRelayer = '<PRIVATE_KEY_RELAYER>';
     // let signerRelayer = new ethers.Wallet(privateKeyRelayer, provider);
