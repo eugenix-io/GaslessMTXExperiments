@@ -17,6 +17,10 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 const approvalRouters = require('./approve/router/approveRouter');
 
+app.get('/', (req, res) => {
+  res.send('Gasless server running!!!');
+})
+
 app.use('/mtx', approvalRouters);
 
 // error handler
