@@ -4,7 +4,8 @@
   "description": "experiments related to gasless transactions",
   "main": "ApproveGasless.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js"
   },
   "repository": {
     "type": "git",
@@ -18,9 +19,12 @@
   "homepage": "https://github.com/eugenix-io/GaslessMTXExperiments#readme",
   "dependencies": {
     "@metamask/eth-sig-util": "^5.0.2",
+    "bluebird": "^3.7.2",
+    "cors": "^2.8.5",
     "defender-relay-client": "^1.38.0",
     "dotenv": "^16.0.3",
     "ethers": "^6.0.2",
+    "nodemon": "^2.0.20",
     "web3": "^1.8.2"
   }
 }
