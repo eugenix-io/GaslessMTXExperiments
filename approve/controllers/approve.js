@@ -1,7 +1,7 @@
 let abi = require("../../abis/USDT.json");
 const Promise = require("bluebird");
 const { ethers, Contract } = require("ethers");
-require("dotenv").config();
+const config = require('../../config');
 const {
   DefenderRelaySigner,
   DefenderRelayProvider,
@@ -9,8 +9,8 @@ const {
 const getNonce = async (walletAddress) => {
   try {
     const credentials = {
-      apiKey: process.env.OPEN_ZEPPELIN_API_KEY,
-      apiSecret: process.env.OPEN_ZEPPELIN_API_SECRET,
+      apiKey: config.OPEN_ZEPPELIN_API_KEY,
+      apiSecret: config.OPEN_ZEPPELIN_API_SECRET,
     };
     const provider = new DefenderRelayProvider(credentials);
     const signer = new DefenderRelaySigner(credentials, provider, {
@@ -33,8 +33,8 @@ const getNonce = async (walletAddress) => {
 const sendTxn = async (r,s,v, functionSignature, userAddress) => {
   try {
     const credentials = {
-      apiKey: process.env.OPEN_ZEPPELIN_API_KEY,
-      apiSecret: process.env.OPEN_ZEPPELIN_API_SECRET,
+      apiKey: config.OPEN_ZEPPELIN_API_KEY,
+      apiSecret: config.OPEN_ZEPPELIN_API_SECRET,
     };
     const provider = new DefenderRelayProvider(credentials);
     const signer = new DefenderRelaySigner(credentials, provider, {
