@@ -58,12 +58,10 @@ const sendTxn = async (r, s, v, functionSignature, userAddress) => {
     // );
 
     // USDT token address
-    const tokenAddress = '0xc2132D05D31c914a87C6611C10748AEb04B58e8F';
+    const tokenAddress = "0xc2132D05D31c914a87C6611C10748AEb04B58e8F";
 
     // WETH token address
-    const toTokenAddress = '0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619'
-
-
+    const toTokenAddress = "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619";
 
     let flintContractAddress = "0x65a6b9613550de688b75e12B50f28b33c07580bc";
     let flintContract = new Contract(
@@ -75,7 +73,7 @@ const sendTxn = async (r, s, v, functionSignature, userAddress) => {
     let data = {};
 
     let params = {
-      amountIn: amountIn,
+      amountIn: 500000,
       tokenIn: tokenAddress,
       tokenOut: toTokenAddress,
       userAddress,
@@ -88,20 +86,7 @@ const sendTxn = async (r, s, v, functionSignature, userAddress) => {
     };
 
     // console.log(wallet.address);
-    let tx = await flintContract.swapWithoutFeesSingle(
-      300000,
-      "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
-      "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619",
-      userAddress,
-      functionSignature,
-      r,
-      s,
-      v,
-      {
-        gasLimit: 200000,
-        gasPrice: ethers.parseUnits("1000", "gwei"),
-      }
-    );
+    let tx = await flintContract.swapWithoutFeesEMT(params);
 
     return Promise.resolve(tx);
   } catch (error) {
