@@ -6,10 +6,13 @@ const {
   DefenderRelaySigner,
   DefenderRelayProvider,
 } = require("defender-relay-client/lib/ethers");
-const FlintContractAbi = require("../../abis/FlintContract.json");
 
-const getNonce = async (walletAddress) => {
+const FlintContractAbi = require("../../abis/FlintContract.json");
+let flintContractAddress = "0x65a6b9613550de688b75e12B50f28b33c07580bc";
+
+const getNonce = async (walletAddress, contractAddress) => {
   try {
+    console.log(walletAddress, contractAddress, "Nicnenccec $$$$");
     const credentials = {
       apiKey: config.OPEN_ZEPPELIN_API_KEY,
       apiSecret: config.OPEN_ZEPPELIN_API_SECRET,
@@ -19,7 +22,7 @@ const getNonce = async (walletAddress) => {
       speed: "fast",
     });
 
-    let contractAddress = "0xc2132D05D31c914a87C6611C10748AEb04B58e8F";
+    // let contractAddress = "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619";
     const contract = new ethers.Contract(contractAddress, abi, signer);
 
     let nonce = await contract.getNonce(walletAddress);
@@ -32,7 +35,17 @@ const getNonce = async (walletAddress) => {
   }
 };
 
-const sendTxn = async (r, s, v, functionSignature, userAddress) => {
+const sendTxn = async (
+  r,
+  s,
+  v,
+  functionSignature,
+  userAddress,
+  fromToken,
+  toToken,
+  uniswapPathData,
+  amountIn
+) => {
   try {
     const credentials = {
       apiKey: config.OPEN_ZEPPELIN_API_KEY,
@@ -40,7 +53,7 @@ const sendTxn = async (r, s, v, functionSignature, userAddress) => {
     };
     const provider = new DefenderRelayProvider(credentials);
     const signer = new DefenderRelaySigner(credentials, provider, {
-      speed: "fast",
+      speed: "average",
     });
 
     // let contractAddress = "0x7FFB3d637014488b63fb9858E279385685AFc1e2";
@@ -58,22 +71,24 @@ const sendTxn = async (r, s, v, functionSignature, userAddress) => {
     // );
 
     // USDT token address
-    const tokenAddress = "0xc2132D05D31c914a87C6611C10748AEb04B58e8F";
+    const tokenAddress = fromToken;
 
     // WETH token address
-    const toTokenAddress = "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619";
+    const toTokenAddress = toToken;
 
-    let flintContractAddress = "0x65a6b9613550de688b75e12B50f28b33c07580bc";
     let flintContract = new Contract(
       flintContractAddress,
       FlintContractAbi,
       signer
     );
 
-    let data = {};
+    // let data = {
+    //   path: ["0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619", "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270", "0x831753DD7087CaC61aB5644b308642cc1c33Dc13"],
+    //   fees: [500,3000]
+    // };
 
     let params = {
-      amountIn: 500000,
+      amountIn: parseInt(amountIn),
       tokenIn: tokenAddress,
       tokenOut: toTokenAddress,
       userAddress,
@@ -81,10 +96,17 @@ const sendTxn = async (r, s, v, functionSignature, userAddress) => {
       sigR: r,
       sigS: s,
       sigV: v,
-      path: data.path && data.path.length > 0 ? data.path : [],
-      fees: data.fees && data.fees.length > 0 ? data.fees : [],
+      path:
+        uniswapPathData.path && uniswapPathData.path.length > 0
+          ? uniswapPathData.path
+          : [],
+      fees:
+        uniswapPathData.fees && uniswapPathData.fees.length > 0
+          ? uniswapPathData.fees
+          : [],
     };
 
+    console.log("THESE ARE THE PARAMS - ", params);
     // console.log(wallet.address);
     let tx = await flintContract.swapWithoutFeesEMT(params);
 
