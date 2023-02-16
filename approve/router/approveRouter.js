@@ -14,6 +14,7 @@ router.post('/send', async (req, res) => {
     const {r,s,v, functionSignature, userAddress} = req.body;
     console.log('RSV params for txn', req.body);
     const tx = await approvalController.sendTxn(r,s,v, functionSignature, userAddress);
+    console.log(tx, 'Transaction from blockchain.....#########')
     res.json({
         message: 'success',
         data: JSON.stringify(tx)

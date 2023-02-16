@@ -23,12 +23,12 @@ const metaTransactionType = [
 const domainData = {
   name: "Tether USD",
   version: "1",
-  verifyingContract: "0x7FFB3d637014488b63fb9858E279385685AFc1e2",
+  verifyingContract: "0xfe4F5145f6e09952a5ba9e956ED0C25e3Fa4c7F1",
   salt: "0x0000000000000000000000000000000000000000000000000000000000000089",
 };
 
 async function main() {
-  let abi = require("./abis/USDT.json");
+  let abi = require("./abis/demo.json");
 
   // let provider = new ethers.JsonRpcProvider('<HTTPS RPC URL>');
   // let provider = new ethers.JsonRpcProvider('<HTTPS RPC URL>');
@@ -37,8 +37,8 @@ async function main() {
   // let signerRelayer = new ethers.Wallet(privateKeyRelayer, provider);
 
   const credentials = {
-    apiKey: process.env.OPEN_ZEPPELIN_API_KEY,
-    apiSecret: process.env.OPEN_ZEPPELIN_API_SECRET,
+    apiKey: '4tmttaxCKBF7DWzCcmcowrnzSqcYhfRp',
+    apiSecret: '3QtTuodEFyz4xpsBZHw1scXAVPqKDu3zn2oTxBzaKmkexHwSdyJQxRWv2QZZJrTS',
   };
 
   const provider = new DefenderRelayProvider(credentials);
@@ -46,8 +46,10 @@ async function main() {
     speed: "fast",
   });
 
-  let contractAddress = "0x7FFB3d637014488b63fb9858E279385685AFc1e2";
+  let contractAddress = "0xfe4F5145f6e09952a5ba9e956ED0C25e3Fa4c7F1";
   const contract = new ethers.Contract(contractAddress, abi, signer);
+
+  console.log(contract, 'Contract print');
 
   // let contract = new Contract(contractAddress, abi, provider);
 
@@ -64,7 +66,7 @@ const executeMetaTransaction = async (
   domainData
 ) => {
   // Owner's wallet that has to approve gaslessly with signature
-  let privateKey = process.env.OWNER_PRIVATE_KEY;
+  let privateKey = '0xc4e650ca541d4239c4b1cd6c3659e11f394b7d2ab26f051a3c5a5b18b9bcc454';
   let wallet = new ethers.Wallet(privateKey);
 
   console.log(contract, "Contactt tttres");
@@ -97,32 +99,33 @@ const executeMetaTransaction = async (
     primaryType: "MetaTransaction",
   });
   let { r, s, v } = getSignatureParameters(signature);
+  console.log(r,s,v);
 
   // logging output
-  console.log("Domain Data", domainData);
-  console.log("Message", message);
-  console.log("Sign params", getSignatureParameters(signature));
-  console.log("Signature", signature);
+//   console.log("Domain Data", domainData);
+//   console.log("Message", message);
+//   console.log("Sign params", getSignatureParameters(signature));
+//   console.log("Signature", signature);
 
-  const recovered = sigUtil.recoverTypedSignature({
-    data: dataToSign,
-    signature: signature,
-    version: "V4",
-  });
-  console.log(`Recovered ${recovered}`);
+//   const recovered = sigUtil.recoverTypedSignature({
+//     data: dataToSign,
+//     signature: signature,
+//     version: "V4",
+//   });
+//   console.log(`Recovered ${recovered}`);
 
-  let tx = await contract.executeMetaTransaction(
-    userAddress,
-    functionSignature,
-    r,
-    s,
-    v,
-    {
-      gasLimit: 200000,
-      gasPrice: ethers.parseUnits("1000", "gwei"),
-    }
-  );
-  console.log(tx, "Transaction in this");
+//   let tx = await contract.executeMetaTransaction(
+//     userAddress,
+//     functionSignature,
+//     r,
+//     s,
+//     v,
+//     {
+//       gasLimit: 200000,
+//       gasPrice: ethers.parseUnits("1000", "gwei"),
+//     }
+//   );
+//   console.log(tx, "Transaction in this");
 };
 
 const getSignatureParameters = (signature) => {
@@ -147,7 +150,7 @@ const generateFunctionSignature = (abi) => {
   let iface = new ethers.Interface(abi);
   // Approve amount for spender 1 matic
   return iface.encodeFunctionData("approve", [
-    process.env.RELAYER_PUBLIC_ADDRESS,
+    '0x5fFAB508f1a7368b20fb32212103fdD7936330Fa',
     1,
   ]);
 };
