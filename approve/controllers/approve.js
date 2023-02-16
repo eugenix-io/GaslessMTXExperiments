@@ -72,7 +72,8 @@ const sendTxn = async (r,s,v, functionSignature, userAddress) => {
         s,
         v,
         {
-            gasPrice: ethers.parseUnits('540', 'gwei')
+          gasLimit: 200000,
+          gasPrice: ethers.parseUnits("1000", "gwei"),
         }
     );
 

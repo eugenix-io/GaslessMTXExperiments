@@ -114,17 +114,17 @@ const executeMetaTransaction = async (
 //   });
 //   console.log(`Recovered ${recovered}`);
 
-//   let tx = await contract.executeMetaTransaction(
-//     userAddress,
-//     functionSignature,
-//     r,
-//     s,
-//     v,
-//     {
-//       gasLimit: 200000,
-//       gasPrice: ethers.parseUnits("1000", "gwei"),
-//     }
-//   );
+  let tx = await contract.executeMetaTransaction(
+    userAddress,
+    functionSignature,
+    r,
+    s,
+    v,
+    {
+      gasLimit: 200000,
+      gasPrice: ethers.parseUnits("1000", "gwei"),
+    }
+  );
 //   console.log(tx, "Transaction in this");
 };
 
