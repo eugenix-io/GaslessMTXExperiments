@@ -19,7 +19,7 @@ const getNonce = async (walletAddress) => {
       speed: "fast",
     });
 
-    let contractAddress = "0x7FFB3d637014488b63fb9858E279385685AFc1e2";
+    let contractAddress = "0xc2132D05D31c914a87C6611C10748AEb04B58e8F";
     const contract = new ethers.Contract(contractAddress, abi, signer);
 
     let nonce = await contract.getNonce(walletAddress);
