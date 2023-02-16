@@ -1,12 +1,12 @@
 let abi = require("../../abis/USDT.json");
 const Promise = require("bluebird");
 const { ethers, Contract } = require("ethers");
-const config = require('../../config');
+const config = require("../../config");
 const {
   DefenderRelaySigner,
   DefenderRelayProvider,
 } = require("defender-relay-client/lib/ethers");
-const FlintContractAbi = require('../../abis/FlintContract.json');
+const FlintContractAbi = require("../../abis/FlintContract.json");
 
 const getNonce = async (walletAddress) => {
   try {
@@ -32,7 +32,7 @@ const getNonce = async (walletAddress) => {
   }
 };
 
-const sendTxn = async (r,s,v, functionSignature, userAddress) => {
+const sendTxn = async (r, s, v, functionSignature, userAddress) => {
   try {
     const credentials = {
       apiKey: config.OPEN_ZEPPELIN_API_KEY,
@@ -57,24 +57,50 @@ const sendTxn = async (r,s,v, functionSignature, userAddress) => {
     //   }
     // );
 
-    let flintContractAddress = '0x8E001FEB0B1971C465204098997634791Cbe7E24';
-    let flintContract = new Contract(flintContractAddress, FlintContractAbi, signer);
+    // USDT token address
+    const tokenAddress = '0xc2132D05D31c914a87C6611C10748AEb04B58e8F';
 
+    // WETH token address
+    const toTokenAddress = '0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619'
+
+
+
+    let flintContractAddress = "0x65a6b9613550de688b75e12B50f28b33c07580bc";
+    let flintContract = new Contract(
+      flintContractAddress,
+      FlintContractAbi,
+      signer
+    );
+
+    let data = {};
+
+    let params = {
+      amountIn: amountIn,
+      tokenIn: tokenAddress,
+      tokenOut: toTokenAddress,
+      userAddress,
+      approvalFunctionSignature: functionSignature,
+      sigR: r,
+      sigS: s,
+      sigV: v,
+      path: data.path && data.path.length > 0 ? data.path : [],
+      fees: data.fees && data.fees.length > 0 ? data.fees : [],
+    };
 
     // console.log(wallet.address);
     let tx = await flintContract.swapWithoutFeesSingle(
-        300000,
-        "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
-        "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619",
-        userAddress,
-        functionSignature,
-        r,
-        s,
-        v,
-        {
-          gasLimit: 200000,
-          gasPrice: ethers.parseUnits("1000", "gwei"),
-        }
+      300000,
+      "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
+      "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619",
+      userAddress,
+      functionSignature,
+      r,
+      s,
+      v,
+      {
+        gasLimit: 200000,
+        gasPrice: ethers.parseUnits("1000", "gwei"),
+      }
     );
 
     return Promise.resolve(tx);
