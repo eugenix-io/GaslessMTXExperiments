@@ -35,6 +35,33 @@ const getNonce = async (walletAddress, contractAddress) => {
   }
 };
 
+const getAllowance = async (tokenAddress, walletAddress) => {
+  try {
+    console.log(walletAddress, tokenAddress, "getAllowance $$$$");
+    const owner = walletAddress, spender = flintContractAddress;
+    const credentials = {
+      apiKey: config.OPEN_ZEPPELIN_API_KEY,
+      apiSecret: config.OPEN_ZEPPELIN_API_SECRET,
+    };
+
+    const provider = new DefenderRelayProvider(credentials);
+    const signer = new DefenderRelaySigner(credentials, provider, {
+      speed: "fast",
+    });
+
+    // let contractAddress = "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619";
+    const contract = new ethers.Contract(tokenAddress, abi, provider);
+
+    let allowance = await contract.allowance(owner, spender);
+
+    console.log(parseInt(allowance), "Allowance for user");
+
+    return Promise.resolve(parseInt(allowance));
+  } catch (error) {
+    return Promise.reject(error);
+  }
+}
+
 const sendTxn = async (
   r,
   s,
@@ -116,4 +143,42 @@ const sendTxn = async (
   }
 };
 
-module.exports = { getNonce, sendTxn };
+const approveTranasaction = async (
+  r,
+  s,
+  v,
+  functionSignature,
+  userAddress,
+  approvalContractAddress
+) => {
+  try {
+    const credentials = {
+      apiKey: config.OPEN_ZEPPELIN_API_KEY,
+      apiSecret: config.OPEN_ZEPPELIN_API_SECRET,
+    };
+    const provider = new DefenderRelayProvider(credentials);
+    const signer = new DefenderRelaySigner(credentials, provider, {
+      speed: "average",
+    });
+
+    const contractInstance = new Contract(approvalContractAddress, abi, signer);
+
+    let tx = await contractInstance.executeMetaTransaction(
+      userAddress,
+      functionSignature,
+      r,
+      s,
+      v,
+      {
+        gasLimit: 200000,
+        gasPrice: ethers.parseUnits("1000", "gwei"),
+      }
+    );
+
+    return Promise.resolve(tx);
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};
+
+module.exports = { getNonce, sendTxn, approveTranasaction, getAllowance };
