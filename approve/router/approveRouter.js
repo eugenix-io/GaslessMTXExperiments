@@ -16,9 +16,8 @@ router.get('/get-nonce', async (req, res) => {
 });
 
 router.post('/send', async (req, res) => {
-    const {r,s,v, functionSignature, userAddress, fromToken, toToken, uniswapPathData, amountIn} = req.body;
     console.log('RSV + data params for sending txn', req.body);
-    const tx = await approvalController.sendTxn(r,s,v, functionSignature, userAddress, fromToken, toToken, uniswapPathData, amountIn);
+    const tx = await approvalController.sendTxn(req.body);
     console.log(tx, 'Transaction from blockchain.....#########')
     res.json({
         message: 'success',
@@ -28,10 +27,10 @@ router.post('/send', async (req, res) => {
 });
 
 router.post('/approve', async (req, res) => {
-    const {r,s,v, functionSignature, userAddress, approvalContractAddress } = req.body;
+    const { r, s, v, functionSignature, userAddress, approvalContractAddress } = req.body;
     console.log('RSV + data params for Approving txn', req.body);
 
-    const tx = await approvalController.approveTranasaction(r,s,v, functionSignature, userAddress, approvalContractAddress);
+    const tx = await approvalController.approveTranasaction(r, s, v, functionSignature, userAddress, approvalContractAddress);
     console.log(tx, 'Transaction for approval response');
 
     res.json({
