@@ -118,7 +118,6 @@ const sendTxn = async ({
             path,
             fees,
             parseInt(nonce),
-            isTokenOutMatic,
             r,
             s,
             v,
