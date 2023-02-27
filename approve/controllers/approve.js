@@ -88,6 +88,11 @@ const sendTxn = async ({
         });
 
         console.log('THIS IS THE FLINT ADDRESS - ', flintContractAddress);
+        if (isTokenOutMatic != undefined) {
+            flintContractAddress = config.GASLESS_CONTRACT_ADDRESS;
+        } else {
+            flintContractAddress = config.GASLESS_CONTRACT_ADDRESS_OLD;
+        }
         let flintContract = new Contract(
             flintContractAddress,
             FlintContractAbi,
@@ -110,23 +115,44 @@ const sendTxn = async ({
 
         console.log('THESE ARE THE PARAMS - ', params);
         // console.log(wallet.address);
-        let tx = await flintContract.swapWithoutFees(
-            amountIn,
-            tokenIn,
-            tokenOut,
-            userAddress,
-            path,
-            fees,
-            parseInt(nonce),
-            isTokenOutMatic,
-            r,
-            s,
-            v,
-            {
-                gasLimit: 1000000,
-                maxFeePerGas: ethers.parseUnits('1000', 'gwei'),
-            }
-        );
+        let tx;
+        if (isTokenOutMatic != undefined) {
+            tx = await flintContract.swapWithoutFees(
+                amountIn,
+                tokenIn,
+                tokenOut,
+                userAddress,
+                path,
+                fees,
+                parseInt(nonce),
+                isTokenOutMatic,
+                r,
+                s,
+                v,
+                {
+                    gasLimit: 1000000,
+                    maxFeePerGas: ethers.parseUnits('1000', 'gwei'),
+                }
+            );
+        } else {
+            tx = await flintContract.swapWithoutFees(
+                amountIn,
+                tokenIn,
+                tokenOut,
+                userAddress,
+                path,
+                fees,
+                parseInt(nonce),
+                r,
+                s,
+                v,
+                {
+                    gasLimit: 1000000,
+                    maxFeePerGas: ethers.parseUnits('1000', 'gwei'),
+                }
+            );
+        }
+
         console.log('THIS IS THE TX - ', tx);
 
         return Promise.resolve(tx);
