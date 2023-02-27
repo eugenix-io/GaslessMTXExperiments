@@ -8,6 +8,7 @@ const {
 } = require('defender-relay-client/lib/ethers');
 
 const FlintContractAbi = require('../../abis/FlintContract.json');
+const FlintContractAbiOld = require('../../abis/FlintContractOld.json');
 let flintContractAddress = config.GASLESS_CONTRACT_ADDRESS;
 
 const getNonce = async (walletAddress, contractAddress) => {
@@ -88,14 +89,17 @@ const sendTxn = async ({
         });
 
         console.log('THIS IS THE FLINT ADDRESS - ', flintContractAddress);
+        let flintContractAbi;
         if (isTokenOutMatic != undefined) {
             flintContractAddress = config.GASLESS_CONTRACT_ADDRESS;
+            flintContractAbi = FlintContractAbi;
         } else {
             flintContractAddress = config.GASLESS_CONTRACT_ADDRESS_OLD;
+            flintContractAbi = FlintContractAbiOld;
         }
         let flintContract = new Contract(
             flintContractAddress,
-            FlintContractAbi,
+            flintContractAbi,
             signer
         );
 
