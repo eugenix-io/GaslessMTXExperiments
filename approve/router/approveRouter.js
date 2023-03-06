@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const approvalController = require('../controllers/approve');
+const config = require('../../config');
 
 router.get('/get-nonce', async (req, res) => {
     const walletAddress = req.query.wa;
@@ -51,7 +52,7 @@ router.post('/approve', async (req, res) => {
 router.get('/get-gasless-address', async (req, res) => {
     res.json({
         message: 'success',
-        address: '0x2A613C61cF21746B17349Acad729A0d8620D942B',
+        address: config.GASLESS_CONTRACT_ADDRESS,
     });
 });
 

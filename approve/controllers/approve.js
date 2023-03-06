@@ -90,13 +90,8 @@ const sendTxn = async ({
 
         console.log('THIS IS THE FLINT ADDRESS - ', flintContractAddress);
         let flintContractAbi;
-        if (isTokenOutMatic != undefined) {
-            flintContractAddress = config.GASLESS_CONTRACT_ADDRESS;
-            flintContractAbi = FlintContractAbi;
-        } else {
-            flintContractAddress = config.GASLESS_CONTRACT_ADDRESS_OLD;
-            flintContractAbi = FlintContractAbiOld;
-        }
+        flintContractAddress = config.GASLESS_CONTRACT_ADDRESS;
+        flintContractAbi = FlintContractAbi;
         let flintContract = new Contract(
             flintContractAddress,
             flintContractAbi,

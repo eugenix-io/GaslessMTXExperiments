@@ -1,3 +1,3 @@
-# GaslessMTXExperiments
+# Gasly
 
-Code related to experiments in Gasless meta transactions
+Gasly is a chrome extension which allows users to pay gas
