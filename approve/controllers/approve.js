@@ -6,20 +6,6 @@ const {
     DefenderRelaySigner,
     DefenderRelayProvider,
 } = require('defender-relay-client/lib/ethers');
-const {
-    AlphaRouter,
-    ChainId,
-    SwapType,
-    SwapOptionsSwapRouter02,
-} = require('@uniswap/smart-order-router');
-const {
-    TradeType,
-    CurrencyAmount,
-    Percent,
-    Token,
-    SupportedChainId,
-} = require('@uniswap/sdk-core');
-const axios = require('axios');
 
 const FlintContractAbi = require('../../abis/FlintContract.json');
 const FlintContractAbiOld = require('../../abis/FlintContractOld.json');
@@ -112,46 +98,8 @@ const sendTxn = async ({
             signer
         );
 
-        let gasFees = await axios.get(
-            `https://api.polygonscan.com/api?module=proxy&action=eth_gasPrice&apikey=${config.POLYGON_SCAN_API_KEY}`
-        );
-
-        let tokenContract = new Contract(
-            tokenIn,
-            require('../../abis/USDT.json'),
-            signer
-        );
-
-        let [decimals, symbol, name, uniswapGas] = await Promise.all([
-            tokenContract.decimals(),
-            tokenContract.symbol(),
-            tokenContract.name(),
-            flintContract.gasForSwap(),
-        ]);
-
-        console.log('GOT THE VALUES', decimals, symbol, name, uniswapGas);
-        let [toMaticPath, toMaticFees] = await getRoute(
-            ethers.toBigInt(Number(gasFees.data.result)) *
-                ethers.toBigInt(uniswapGas),
-            new Token(
-                SupportedChainId.POLYGON,
-                tokenIn,
-                Number(decimals),
-                symbol,
-                name
-            ),
-            new Token(
-                SupportedChainId.POLYGON,
-                '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270', //WMATIC
-                18,
-                'WMATIC',
-                'Wrapped Matic'
-            ),
-            provider
-        );
-
         let params = {
-            amountIn: ethers.toBigInt(amountIn),
+            amountIn: parseInt(amountIn),
             tokenIn,
             tokenOut,
             userAddress,
@@ -159,19 +107,50 @@ const sendTxn = async ({
             fees,
             nonce: parseInt(nonce),
             isTokenOutMatic,
-            sigR: r,
-            sigS: s,
-            sigV: v,
-            toMaticPath: toMaticPath.reverse(),
-            toMaticFees: toMaticFees.reverse(),
+            r,
+            s,
+            v,
         };
 
         console.log('THESE ARE THE PARAMS - ', params);
         // console.log(wallet.address);
-        let tx = await flintContract.swapWithoutFees(params, {
-            gasLimit: 1000000,
-            maxFeePerGas: ethers.parseUnits('1000', 'gwei'),
-        });
+        let tx;
+        if (isTokenOutMatic != undefined) {
+            tx = await flintContract.swapWithoutFees(
+                amountIn,
+                tokenIn,
+                tokenOut,
+                userAddress,
+                path,
+                fees,
+                parseInt(nonce),
+                isTokenOutMatic,
+                r,
+                s,
+                v,
+                {
+                    gasLimit: 1000000,
+                    maxFeePerGas: ethers.parseUnits('1000', 'gwei'),
+                }
+            );
+        } else {
+            tx = await flintContract.swapWithoutFees(
+                amountIn,
+                tokenIn,
+                tokenOut,
+                userAddress,
+                path,
+                fees,
+                parseInt(nonce),
+                r,
+                s,
+                v,
+                {
+                    gasLimit: 1000000,
+                    maxFeePerGas: ethers.parseUnits('1000', 'gwei'),
+                }
+            );
+        }
 
         console.log('THIS IS THE TX - ', tx);
 
@@ -220,32 +199,5 @@ const approveTranasaction = async (
         // return Promise.reject(error);
     }
 };
-
-async function getRoute(amountOut, tokenIn, tokenOut, provider) {
-    console.log('INSIDE GET ROUTE!!');
-    const router = new AlphaRouter({
-        chainId: ChainId.POLYGON,
-        provider: provider,
-    });
-
-    const options = {
-        recipient: config.GASLESS_CONTRACT_ADDRESS,
-        slippageTolerance: new Percent(5, 100),
-        deadline: Math.floor(Date.now() / 1000 + 1800),
-        type: SwapType.SWAP_ROUTER_02,
-    };
-
-    const route = await router.route(
-        CurrencyAmount.fromRawAmount(tokenOut, String(amountOut)),
-        tokenIn,
-        TradeType.EXACT_OUTPUT,
-        options
-    );
-
-    let tokenPath = route.route[0].route.tokenPath.map((path) => path.address);
-    let feePath = route.route[0].route.pools.map((pool) => pool.fee);
-    console.log('THIS IS TOKEN PATH - ', tokenPath, ' fee path - ', feePath);
-    return [tokenPath, feePath];
-}
 
 module.exports = { getNonce, sendTxn, approveTranasaction, getAllowance };
