@@ -6,6 +6,7 @@ const {
     DefenderRelaySigner,
     DefenderRelayProvider,
 } = require('defender-relay-client/lib/ethers');
+const axios = require('axios');
 
 const FlintContractAbi = require('../../abis/FlintContract.json');
 const FlintContractAbiOld = require('../../abis/FlintContractOld.json');
@@ -98,8 +99,16 @@ const sendTxn = async ({
             signer
         );
 
+        const t1 = new Date().getTime();
+        let [toMaticPath, toMaticFees] = await getRoute(
+            tokenIn,
+            ethers.parseUnits('1000', 'gwei') * ethers.toBigInt(130000)
+        );
+        const t2 = new Date().getTime();
+        console.log(`time to get route - ${(t2 - t1) / 1000}`);
+
         let params = {
-            amountIn: parseInt(amountIn),
+            amountIn: ethers.toBigInt(amountIn),
             tokenIn,
             tokenOut,
             userAddress,
@@ -107,50 +116,21 @@ const sendTxn = async ({
             fees,
             nonce: parseInt(nonce),
             isTokenOutMatic,
-            r,
-            s,
-            v,
+            sigR: r,
+            sigS: s,
+            sigV: v,
+            toMaticPath: toMaticPath.reverse(),
+            toMaticFees: toMaticFees.reverse(),
         };
 
         console.log('THESE ARE THE PARAMS - ', params);
         // console.log(wallet.address);
-        let tx;
-        if (isTokenOutMatic != undefined) {
-            tx = await flintContract.swapWithoutFees(
-                amountIn,
-                tokenIn,
-                tokenOut,
-                userAddress,
-                path,
-                fees,
-                parseInt(nonce),
-                isTokenOutMatic,
-                r,
-                s,
-                v,
-                {
-                    gasLimit: 1000000,
-                    maxFeePerGas: ethers.parseUnits('1000', 'gwei'),
-                }
-            );
-        } else {
-            tx = await flintContract.swapWithoutFees(
-                amountIn,
-                tokenIn,
-                tokenOut,
-                userAddress,
-                path,
-                fees,
-                parseInt(nonce),
-                r,
-                s,
-                v,
-                {
-                    gasLimit: 1000000,
-                    maxFeePerGas: ethers.parseUnits('1000', 'gwei'),
-                }
-            );
-        }
+        let tx = await flintContract.swapWithoutFees(params, {
+            gasLimit: 1000000,
+            maxFeePerGas: ethers.parseUnits('1000', 'gwei'),
+        });
+        const t3 = new Date().getTime();
+        console.log(`time to publish txn - ${(t3 - t2) / 1000}`);
 
         console.log('THIS IS THE TX - ', tx);
 
@@ -198,6 +178,30 @@ const approveTranasaction = async (
         console.log('APPROVAL FAILED - ', error);
         // return Promise.reject(error);
     }
+};
+
+const getRoute = async (tokenIn, amountOut) => {
+    console.log('getting route');
+    const WMATIC = '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270';
+    let response = await axios.get(
+        `https://api.uniswap.org/v1/quote?protocols=v2%2Cv3%2Cmixed&tokenInAddress=${tokenIn}&tokenInChainId=137&tokenOutAddress=${WMATIC}&tokenOutChainId=137&amount=${amountOut}&type=exactOut`,
+        {
+            headers: {
+                origin: 'https://app.uniswap.org',
+            },
+        }
+    );
+    console.log('got route');
+
+    let toMaticPath = [];
+    let toMaticFees = [];
+    response.data.route[0].map((obj) => {
+        toMaticPath.push(obj.tokenIn.address);
+        toMaticFees.push(obj.fee);
+    });
+    toMaticPath.push(WMATIC);
+    console.log('returning result');
+    return [toMaticPath, toMaticFees];
 };
 
 module.exports = { getNonce, sendTxn, approveTranasaction, getAllowance };
