@@ -114,7 +114,7 @@ router.get('/v2/instructions', (req, res) => {
         },
         {
             asset: 'https://dnj9s9rkg1f49.cloudfront.net/swap_confirm.webm',
-            title: 'Congratulations 🎉💔',
+            title: 'Congratulations 🎉',
             text: "You've successfully swapped on Uniswap, paying gas fees in your desired token",
         },
     ]);
