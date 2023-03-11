@@ -85,4 +85,39 @@ router.get('/instructions', (req, res) => {
     ]);
 });
 
+router.get('/v2/instructions', (req, res) => {
+    res.status(200).send([
+        {
+            asset: 'https://dnj9s9rkg1f49.cloudfront.net/first_step.webm',
+            title: 'Go to Uniswap ',
+            text: 'Select Polygon as the network. The GasPay Beta only supports Polygon network',
+        },
+        {
+            asset: 'https://dnj9s9rkg1f49.cloudfront.net/token.webm',
+            title: 'Select the swap tokens ',
+            text: 'Select the swap tokens and ensure you are swapping at least $0.25 worth of tokens ',
+        },
+        {
+            asset: 'https://dnj9s9rkg1f49.cloudfront.net/approve.webm',
+            title: 'Select your gas fees token',
+            text: "Gaspay allows you to pay gas in the 'from' token or the native token (MATIC)",
+        },
+        {
+            asset: 'https://dnj9s9rkg1f49.cloudfront.net/approve.webm',
+            title: 'Approve the swap',
+            text: 'Approve the token by signing the message on Metamask gaslessly',
+        },
+        {
+            asset: 'https://dnj9s9rkg1f49.cloudfront.net/swap_initiate.webm',
+            title: 'Confirm the swap',
+            text: 'Sign the message to confirm the swap and deduct fees in the selected token.',
+        },
+        {
+            asset: 'https://dnj9s9rkg1f49.cloudfront.net/swap_confirm.webm',
+            title: 'Congratulations 🎉💔',
+            text: "You've successfully swapped on Uniswap, paying gas fees in your desired token",
+        },
+    ]);
+});
+
 module.exports = router;
