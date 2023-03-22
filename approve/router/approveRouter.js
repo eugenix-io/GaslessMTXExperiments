@@ -56,6 +56,23 @@ router.get('/get-gasless-address', async (req, res) => {
     });
 });
 
+router.get('/v2/get-gasless-address', async (req, res) => {
+    res.json({
+        message: 'success',
+        address: {
+            polygon: config.GASLESS_CONTRACT_ADDRESS,
+            arbitrum: config.GASLESS_CONTRACT_ADDRESS_ARBITRUM,
+        },
+    });
+});
+
+router.get('/get-supported-networks', async (req, res) => {
+    res.json({
+        message: 'success',
+        supportedNetworks: [137, 42161],
+    });
+});
+
 router.get('/get-allowance', async (req, res) => {
     const walletAddress = req.query.wa;
     const tokenAddress = req.query.ta;
