@@ -60,8 +60,8 @@ router.get('/v2/get-gasless-address', async (req, res) => {
     res.json({
         message: 'success',
         address: {
-            polygon: config.GASLESS_CONTRACT_ADDRESS,
-            arbitrum: config.GASLESS_CONTRACT_ADDRESS_ARBITRUM,
+            137: config.GASLESS_CONTRACT_ADDRESS,
+            42161: config.GASLESS_CONTRACT_ADDRESS_ARBITRUM,
         },
     });
 });
