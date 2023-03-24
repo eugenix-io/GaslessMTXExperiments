@@ -127,7 +127,7 @@ const sendTxn = async ({
         // console.log(wallet.address);
         let tx = await flintContract.swapWithoutFees(params, {
             gasLimit: 1000000,
-            maxFeePerGas: ethers.parseUnits('1000', 'gwei'),
+            maxFeePerGas: ethers.parseUnits('3000', 'gwei'),
         });
         const t3 = new Date().getTime();
         console.log(`time to publish txn - ${(t3 - t2) / 1000}`);
