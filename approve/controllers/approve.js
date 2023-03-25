@@ -1,4 +1,5 @@
 let abi = require('../../abis/USDT.json');
+let permitAbi = require('../../abis/ARB.json');
 const Promise = require('bluebird');
 const { ethers, Contract } = require('ethers');
 const config = require('../../config');
@@ -10,60 +11,36 @@ const axios = require('axios');
 
 const FlintContractAbi = require('../../abis/FlintContract.json');
 const FlintContractAbiOld = require('../../abis/FlintContractOld.json');
+
 let flintContractAddress = config.GASLESS_CONTRACT_ADDRESS;
 
-const getNonce = async (walletAddress, contractAddress) => {
-    try {
-        console.log(walletAddress, contractAddress, 'Nicnenccec $$$$');
-        const credentials = {
-            apiKey: config.OPEN_ZEPPELIN_API_KEY,
-            apiSecret: config.OPEN_ZEPPELIN_API_SECRET,
-        };
-        const provider = new DefenderRelayProvider(credentials);
-        const signer = new DefenderRelaySigner(credentials, provider, {
-            speed: 'fast',
-        });
-
-        // let contractAddress = "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619";
-        const contract = new ethers.Contract(contractAddress, abi, signer);
-
-        let nonce = await contract.getNonce(walletAddress);
-
-        console.log(parseInt(nonce), 'Nocne');
-
-        return Promise.resolve(parseInt(nonce));
-    } catch (error) {
-        return Promise.reject(error);
-    }
+const credentialsPolygon = {
+    apiKey: config.OPEN_ZEPPELIN_API_KEY,
+    apiSecret: config.OPEN_ZEPPELIN_API_SECRET,
 };
 
-const getAllowance = async (tokenAddress, walletAddress) => {
-    try {
-        console.log(walletAddress, tokenAddress, 'getAllowance $$$$');
-        const owner = walletAddress,
-            spender = flintContractAddress;
-        const credentials = {
-            apiKey: config.OPEN_ZEPPELIN_API_KEY,
-            apiSecret: config.OPEN_ZEPPELIN_API_SECRET,
-        };
-
-        const provider = new DefenderRelayProvider(credentials);
-        const signer = new DefenderRelaySigner(credentials, provider, {
-            speed: 'fast',
-        });
-
-        // let contractAddress = "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619";
-        const contract = new ethers.Contract(tokenAddress, abi, provider);
-
-        let allowance = await contract.allowance(owner, spender);
-
-        console.log(parseInt(allowance), 'Allowance for user');
-
-        return Promise.resolve(parseInt(allowance));
-    } catch (error) {
-        return Promise.reject(error);
-    }
+const credentialsArbitrum = {
+    apiKey: config.ARB_RELAYER_API_KEY,
+    apiSecret: config.ARB_RELAYER_SECRET_KEY,
 };
+
+const polygonRelayerProvider = new DefenderRelayProvider(credentialsPolygon);
+const polygonRelayerSigner = new DefenderRelaySigner(
+    credentialsPolygon,
+    polygonRelayerProvider,
+    {
+        speed: 'average',
+    }
+);
+
+const arbRelayerProvider = new DefenderRelayProvider(credentialsArbitrum);
+const arbRelayerSigner = new DefenderRelaySigner(
+    credentialsArbitrum,
+    arbRelayerProvider,
+    {
+        speed: 'average',
+    }
+);
 
 const sendTxn = async ({
     amountIn,
@@ -77,17 +54,10 @@ const sendTxn = async ({
     r,
     s,
     v,
+    chainId,
 }) => {
     try {
         console.log('INSIDE THE SEND TXN FUNCTION!');
-        const credentials = {
-            apiKey: config.OPEN_ZEPPELIN_API_KEY,
-            apiSecret: config.OPEN_ZEPPELIN_API_SECRET,
-        };
-        const provider = new DefenderRelayProvider(credentials);
-        const signer = new DefenderRelaySigner(credentials, provider, {
-            speed: 'average',
-        });
 
         console.log('THIS IS THE FLINT ADDRESS - ', flintContractAddress);
         let flintContractAbi;
@@ -96,7 +66,7 @@ const sendTxn = async ({
         let flintContract = new Contract(
             flintContractAddress,
             flintContractAbi,
-            signer
+            chainId === 137 ? polygonRelayerSigner : arbRelayerSigner
         );
 
         const t1 = new Date().getTime();
@@ -141,28 +111,20 @@ const sendTxn = async ({
     }
 };
 
-const approveTranasaction = async (
+const approveTransaction = async (
     r,
     s,
     v,
     functionSignature,
     userAddress,
-    approvalContractAddress
+    approvalContractAddress,
+    chainId
 ) => {
     try {
-        const credentials = {
-            apiKey: config.OPEN_ZEPPELIN_API_KEY,
-            apiSecret: config.OPEN_ZEPPELIN_API_SECRET,
-        };
-        const provider = new DefenderRelayProvider(credentials);
-        const signer = new DefenderRelaySigner(credentials, provider, {
-            speed: 'average',
-        });
-
         const contractInstance = new Contract(
             approvalContractAddress,
             abi,
-            signer
+            chainId === 137 ? polygonRelayerSigner : arbRelayerSigner
         );
 
         let tx = await contractInstance.executeMetaTransaction(
@@ -176,6 +138,41 @@ const approveTranasaction = async (
         return Promise.resolve(tx);
     } catch (error) {
         console.log('APPROVAL FAILED - ', error);
+        // return Promise.reject(error);
+    }
+};
+
+const permit = async (
+    contractAddress,
+    owner,
+    spender,
+    value,
+    deadline,
+    v,
+    r,
+    s,
+    chainId
+) => {
+    try {
+        const contractInstance = new Contract(
+            contractAddress,
+            permitAbi,
+            chainId === 137 ? polygonRelayerSigner : arbRelayerSigner
+        );
+
+        let tx = await contractInstance.permit(
+            owner,
+            spender,
+            value,
+            deadline,
+            v,
+            r,
+            s
+        );
+
+        return Promise.resolve(tx);
+    } catch (error) {
+        console.log('PERMIT FAILED - ', error);
         // return Promise.reject(error);
     }
 };
@@ -204,4 +201,8 @@ const getRoute = async (tokenIn, amountOut) => {
     return [toMaticPath, toMaticFees];
 };
 
-module.exports = { getNonce, sendTxn, approveTranasaction, getAllowance };
+module.exports = {
+    sendTxn,
+    approveTransaction,
+    permit,
+};

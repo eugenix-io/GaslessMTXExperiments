@@ -2,25 +2,36 @@ const router = require('express').Router();
 const approvalController = require('../controllers/approve');
 const config = require('../../config');
 
-router.get('/get-nonce', async (req, res) => {
-    const walletAddress = req.query.wa;
-    const contractAddress = req.query.contract;
-
-    console.log(walletAddress, contractAddress, '&&&&& thisishs sishsh');
-
-    const nonce = await approvalController.getNonce(
-        walletAddress,
-        contractAddress
-    );
-    return res.json({
-        message: 'success',
-        nonce,
-    });
-});
-
 router.post('/send', async (req, res) => {
     console.log('RSV + data params for sending txn', req.body);
-    const tx = await approvalController.sendTxn(req.body);
+    const {
+        amountIn,
+        tokenIn,
+        tokenOut,
+        userAddress,
+        path,
+        fees,
+        nonce,
+        isTokenOutMatic,
+        r,
+        s,
+        v,
+        chainId,
+    } = req.body;
+    const tx = await approvalController.sendTxn(
+        amountIn,
+        tokenIn,
+        tokenOut,
+        userAddress,
+        path,
+        fees,
+        nonce,
+        isTokenOutMatic,
+        r,
+        s,
+        v,
+        chainId || 137
+    );
     console.log(tx, 'Transaction from blockchain.....#########');
     res.json({
         message: 'success',
@@ -29,19 +40,60 @@ router.post('/send', async (req, res) => {
 });
 
 router.post('/approve', async (req, res) => {
-    const { r, s, v, functionSignature, userAddress, approvalContractAddress } =
-        req.body;
-    console.log('RSV + data params for Approving txn', req.body);
-
-    const tx = await approvalController.approveTranasaction(
+    const {
         r,
         s,
         v,
         functionSignature,
         userAddress,
-        approvalContractAddress
+        approvalContractAddress,
+        chainId,
+    } = req.body;
+    console.log('RSV + data params for Approving txn', req.body);
+
+    const tx = await approvalController.approveTransaction(
+        r,
+        s,
+        v,
+        functionSignature,
+        userAddress,
+        approvalContractAddress,
+        chainId || 137
     );
     console.log(tx, 'Transaction for approval response');
+
+    res.json({
+        message: 'success',
+        data: JSON.stringify(tx),
+    });
+});
+
+router.post('/permit', async (req, res) => {
+    const {
+        contractAddress,
+        owner,
+        spender,
+        value,
+        deadline,
+        v,
+        r,
+        s,
+        chainId,
+    } = req.body;
+    console.log('RSV + data params for permit', req.body);
+
+    const tx = await approvalController.permit(
+        contractAddress,
+        owner,
+        spender,
+        value,
+        deadline,
+        v,
+        r,
+        s,
+        chainId || 137
+    );
+    console.log(tx, 'Transaction for permit response');
 
     res.json({
         message: 'success',
@@ -70,23 +122,6 @@ router.get('/get-supported-networks', async (req, res) => {
     res.json({
         message: 'success',
         supportedNetworks: [137, 42161],
-    });
-});
-
-router.get('/get-allowance', async (req, res) => {
-    const walletAddress = req.query.wa;
-    const tokenAddress = req.query.ta;
-
-    console.log({ walletAddress, tokenAddress }, 'Query...');
-
-    const resp = await approvalController.getAllowance(
-        tokenAddress,
-        walletAddress
-    );
-
-    res.json({
-        message: 'success',
-        allowance: parseInt(resp),
     });
 });
 
