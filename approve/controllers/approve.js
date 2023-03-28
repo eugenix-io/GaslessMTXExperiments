@@ -51,6 +51,7 @@ const sendTxn = async ({
     fees,
     nonce,
     isTokenOutMatic,
+    isTokenOutNative,
     r,
     s,
     v,
@@ -60,8 +61,19 @@ const sendTxn = async ({
         console.log('INSIDE THE SEND TXN FUNCTION!');
 
         console.log('THIS IS THE FLINT ADDRESS - ', flintContractAddress);
+        let isNewContract = isTokenOutNative != undefined ? true : false;
         let flintContractAbi;
-        flintContractAddress = config.GASLESS_CONTRACT_ADDRESS;
+        switch (chainId) {
+            case 137:
+                flintContractAddress = config.GASLESS_CONTRACT_ADDRESS_POLYGON;
+                break;
+            case 42161:
+                flintContractAddress = config.GASLESS_CONTRACT_ADDRESS_ARBITRUM;
+                break;
+        }
+        if (!isNewContract) {
+            flintContractAddress = config.GASLESS_CONTRACT_ADDRESS;
+        }
         flintContractAbi = FlintContractAbi;
         let flintContract = new Contract(
             flintContractAddress,
@@ -72,6 +84,7 @@ const sendTxn = async ({
         const t1 = new Date().getTime();
         let [toMaticPath, toMaticFees] = await getRoute(
             tokenIn,
+            getNativeTokenAddress(chainId),
             ethers.parseUnits('1000', 'gwei') * ethers.toBigInt(130000)
         );
         const t2 = new Date().getTime();
@@ -85,13 +98,20 @@ const sendTxn = async ({
             path,
             fees,
             nonce: parseInt(nonce),
-            isTokenOutMatic,
             sigR: r,
             sigS: s,
             sigV: v,
-            toMaticPath: toMaticPath.reverse(),
-            toMaticFees: toMaticFees.reverse(),
         };
+
+        if (isTokenOutMatic == undefined) {
+            params.toNativePath = toMaticPath.reverse();
+            params.toNativeFees = toMaticFees.reverse();
+            params.isTokenOutNative = isTokenOutNative;
+        } else {
+            params.toMaticPath = toMaticPath.reverse();
+            params.toMaticFees = toMaticFees.reverse();
+            params.isTokenOutMatic = isTokenOutMatic;
+        }
 
         console.log('THESE ARE THE PARAMS - ', params);
         // console.log(wallet.address);
@@ -177,11 +197,19 @@ const permit = async (
     }
 };
 
-const getRoute = async (tokenIn, amountOut) => {
+const getNativeTokenAddress = (chainId) => {
+    switch (chainId) {
+        case 137:
+            return '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270';
+        case 42161:
+            return '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1';
+    }
+};
+
+const getRoute = async (tokenIn, tokenOut, amountOut) => {
     console.log('getting route');
-    const WMATIC = '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270';
     let response = await axios.get(
-        `https://api.uniswap.org/v1/quote?protocols=v2%2Cv3%2Cmixed&tokenInAddress=${tokenIn}&tokenInChainId=137&tokenOutAddress=${WMATIC}&tokenOutChainId=137&amount=${amountOut}&type=exactOut`,
+        `https://api.uniswap.org/v1/quote?protocols=v2%2Cv3%2Cmixed&tokenInAddress=${tokenIn}&tokenInChainId=137&tokenOutAddress=${tokenOut}&tokenOutChainId=137&amount=${amountOut}&type=exactOut`,
         {
             headers: {
                 origin: 'https://app.uniswap.org',
@@ -196,7 +224,7 @@ const getRoute = async (tokenIn, amountOut) => {
         toMaticPath.push(obj.tokenIn.address);
         toMaticFees.push(obj.fee);
     });
-    toMaticPath.push(WMATIC);
+    toMaticPath.push(tokenOut);
     console.log('returning result');
     return [toMaticPath, toMaticFees];
 };

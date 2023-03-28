@@ -112,7 +112,7 @@ router.get('/v2/get-gasless-address', async (req, res) => {
     res.json({
         message: 'success',
         address: {
-            137: config.GASLESS_CONTRACT_ADDRESS,
+            137: config.GASLESS_CONTRACT_ADDRESS_POLYGON,
             42161: config.GASLESS_CONTRACT_ADDRESS_ARBITRUM,
         },
     });
