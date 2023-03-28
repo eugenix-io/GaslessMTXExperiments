@@ -12,13 +12,15 @@ router.post('/send', async (req, res) => {
         path,
         fees,
         nonce,
-        isTokenOutMatic,
+        isTokenOutNative,
         r,
         s,
         v,
         chainId,
     } = req.body;
-    const tx = await approvalController.sendTxn(
+
+    console.log('TOKENS _ ', tokenIn, tokenOut);
+    const tx = await approvalController.sendTxn({
         amountIn,
         tokenIn,
         tokenOut,
@@ -26,12 +28,12 @@ router.post('/send', async (req, res) => {
         path,
         fees,
         nonce,
-        isTokenOutMatic,
+        isTokenOutNative,
         r,
         s,
         v,
-        chainId || 137
-    );
+        chainId: chainId || 137,
+    });
     console.log(tx, 'Transaction from blockchain.....#########');
     res.json({
         message: 'success',
