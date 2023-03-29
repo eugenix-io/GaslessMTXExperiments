@@ -102,7 +102,7 @@ const sendTxn = async ({
 
         let flintContractAbi;
 
-        if (isTokenOutMatic == undefined) {
+        if (isNewContract) {
             params.toNativePath = toMaticPath.reverse();
             params.toNativeFees = toMaticFees.reverse();
             params.isTokenOutNative = isTokenOutNative;
