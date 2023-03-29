@@ -219,7 +219,7 @@
                     },
                     {
                         "internalType": "bool",
-                        "name": "isTokenOutNative",
+                        "name": "isTokenOutMatic",
                         "type": "bool"
                     },
                     {

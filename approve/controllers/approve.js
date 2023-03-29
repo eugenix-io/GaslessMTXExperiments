@@ -110,7 +110,7 @@ const sendTxn = async ({
         } else {
             params.toMaticPath = toMaticPath.reverse();
             params.toMaticFees = toMaticFees.reverse();
-            params.isTokenOutMatic = isTokenOutMatic;
+            params.isTokenOutMatic = Boolean(isTokenOutMatic);
             flintContractAbi = FlintContractAbi;
         }
 
