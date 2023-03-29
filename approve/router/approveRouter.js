@@ -123,7 +123,7 @@ router.get('/v2/get-gasless-address', async (req, res) => {
 router.get('/get-supported-networks', async (req, res) => {
     res.json({
         message: 'success',
-        supportedNetworks: [137, 42161],
+        supportedNetworks: [137],
     });
 });
 
