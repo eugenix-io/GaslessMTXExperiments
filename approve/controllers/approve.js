@@ -135,6 +135,7 @@ const sendTxn = async ({
             ethers.parseUnits;
         } else if (chainId == 137) {
             gasParams.maxFeePerGas = ethers.parseUnits('3000', 'gwei');
+            gasParams.gasLimit = 1000000;
         }
         console.log('these are gas params - ', gasParams);
         try {
