@@ -126,12 +126,15 @@ const sendTxn = async ({
         // console.log(wallet.address);
         let tx;
         let gasParams = {
-            gasLimit: chainId == 137 ? 500000 : 2000000,
-            maxFeePerGas: ethers.parseUnits('3000', 'gwei'),
+            // gasLimit: chainId == 137 ? 500000 : 2000000,
+            // maxFeePerGas: ethers.parseUnits('3000', 'gwei'),
         };
         if (chainId == 42161) {
-            gasParams.gasPrice = ethers.parseUnits('0.1', 'gwei');
-            delete gasParams.maxFeePerGas;
+            gasParams.gasPrice = await getGasFees(chainId); //ideally we could just specify maxFeePerGas but the contract takes 1000 gwei as the fees if not present, so estimate gas functon fails
+            // gasParams.maxFeePerGas = ethers.parseUnits('1', 'gwei');
+            ethers.parseUnits;
+        } else if (chainId == 137) {
+            gasParams.maxFeePerGas = ethers.parseUnits('3000', 'gwei');
         }
         console.log('these are gas params - ', gasParams);
         try {
@@ -149,6 +152,24 @@ const sendTxn = async ({
         console.error('SEND TX FAILED - ', error);
         // return Promise.reject(error);
     }
+};
+
+const getGasFees = async (chainId) => {
+    let result;
+    switch (chainId) {
+        case 137:
+            result = await axios.get(
+                `https://api.polygonscan.com/api?module=proxy&action=eth_gasPrice`
+            );
+            break;
+        case 42161:
+            result = await axios.get(
+                `https://api.arbiscan.io/api?module=proxy&action=eth_gasPrice`
+            );
+            break;
+    }
+    ethers.to;
+    return Number(result.data.result);
 };
 
 const approveTransaction = async (
