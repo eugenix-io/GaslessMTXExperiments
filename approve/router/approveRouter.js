@@ -125,7 +125,7 @@ router.get('/v2/get-gasless-address', async (req, res) => {
 router.get('/get-supported-networks', async (req, res) => {
     res.json({
         message: 'success',
-        supportedNetworks: [137],
+        supportedNetworks: [137, 42161],
     });
 });
 
@@ -174,6 +174,27 @@ router.get('/v2/instructions', (req, res) => {
             text: "You've successfully swapped on Uniswap, paying gas fees in your desired token",
         },
     ]);
+});
+
+router.get('/route/uniswap', async (req, res) => {
+    let [path, fees] = await approvalController.getRoute(
+        req.query.tokenIn,
+        req.query.tokenOut,
+        req.query.amount,
+        req.query.chainId
+    );
+    res.status(200).send({
+        path,
+        fees,
+    });
+});
+
+router.post('/approve-without-fees', async (req, res) => {
+    const tx = await approvalController.gaslessApproval(req.body);
+    res.json({
+        message: 'success',
+        data: JSON.stringify(tx),
+    });
 });
 
 module.exports = router;

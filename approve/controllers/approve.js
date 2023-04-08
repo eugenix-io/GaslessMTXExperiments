@@ -65,14 +65,7 @@ const sendTxn = async ({
 
         console.log('THIS IS THE FLINT ADDRESS - ', flintContractAddress);
         let isNewContract = isTokenOutNative != undefined ? true : false;
-        switch (chainId) {
-            case 137:
-                flintContractAddress = config.GASLESS_CONTRACT_ADDRESS_POLYGON;
-                break;
-            case 42161:
-                flintContractAddress = config.GASLESS_CONTRACT_ADDRESS_ARBITRUM;
-                break;
-        }
+        flintContractAddress = getContractAddress(chainId);
         if (!isNewContract) {
             flintContractAddress = config.GASLESS_CONTRACT_ADDRESS;
         }
@@ -239,6 +232,53 @@ const permit = async (
     }
 };
 
+const gaslessApproval = async ({
+    userAddress,
+    approvalSigR,
+    approvalSigS,
+    approvalSigV,
+    tokenAddress,
+    approvalValue,
+    approvalDeadline,
+    toNativePath,
+    toNativeFees,
+    gasForApproval,
+    nonce,
+    sigR,
+    sigS,
+    sigV,
+    chainId,
+}) => {
+    console.log('inside getting gasless approval');
+
+    let flintContractAddress = getContractAddress(chainId);
+    let contractInstance = new Contract(
+        flintContractAddress,
+        FlintContractAbiV4,
+        chainId == 137 ? polygonRelayerSigner : arbRelayerSigner
+    );
+
+    let params = {
+        userAddress,
+        approvalSigR,
+        approvalSigS,
+        approvalSigV,
+        tokenAddress,
+        approvalValue,
+        approvalDeadline,
+        toNativePath,
+        toNativeFees,
+        gasForApproval,
+        nonce,
+        sigR,
+        sigS,
+        sigV,
+    };
+    console.log('these are the params - ', params);
+    const tx = await contractInstance.approveWithoutFees(params);
+    return Promise.resolve(tx);
+};
+
 const getNativeTokenAddress = (chainId) => {
     switch (chainId) {
         case 137:
@@ -258,7 +298,6 @@ const getRoute = async (tokenIn, tokenOut, amountOut, chainId) => {
             },
         }
     );
-    console.log('got route');
 
     let toMaticPath = [];
     let toMaticFees = [];
@@ -271,8 +310,21 @@ const getRoute = async (tokenIn, tokenOut, amountOut, chainId) => {
     return [toMaticPath, toMaticFees];
 };
 
+const getContractAddress = (chainId) => {
+    switch (chainId) {
+        case 137:
+            return config.GASLESS_CONTRACT_ADDRESS_POLYGON;
+            break;
+        case 42161:
+            return config.GASLESS_CONTRACT_ADDRESS_ARBITRUM;
+            break;
+    }
+};
+
 module.exports = {
     sendTxn,
     approveTransaction,
     permit,
+    getRoute,
+    gaslessApproval,
 };
