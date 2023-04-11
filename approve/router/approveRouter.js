@@ -146,7 +146,7 @@ router.get('/v2/instructions', (req, res) => {
         {
             asset: 'https://dnj9s9rkg1f49.cloudfront.net/first_step.webm',
             title: 'Go to Uniswap ',
-            text: 'Select Polygon as the network. The GasPay Beta only supports Polygon network',
+            text: 'Select Polygon/Arbitrum as the network. The GasPay Beta only supports Polygon network',
         },
         {
             asset: 'https://dnj9s9rkg1f49.cloudfront.net/token.webm',
