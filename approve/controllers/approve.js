@@ -1,5 +1,6 @@
 let abi = require('../../abis/USDT.json');
 let permitAbi = require('../../abis/ARB.json');
+const sushiSwapAbi = require('../../abis/SushiSwapFlintGasless.json');
 const Promise = require('bluebird');
 const { ethers, Contract } = require('ethers');
 const config = require('../../config');
@@ -11,6 +12,7 @@ const axios = require('axios');
 
 const FlintContractAbi = require('../../abis/FlintContract.json');
 const FlintContractAbiV4 = require('../../abis/FlintContractV4.json');
+const { reject } = require('bluebird');
 
 let flintContractAddress = config.GASLESS_CONTRACT_ADDRESS;
 
@@ -19,28 +21,28 @@ const credentialsPolygon = {
     apiSecret: config.OPEN_ZEPPELIN_API_SECRET,
 };
 
-const credentialsArbitrum = {
-    apiKey: config.ARB_RELAYER_API_KEY,
-    apiSecret: config.ARB_RELAYER_SECRET_KEY,
-};
+// const credentialsArbitrum = {
+//     apiKey: config.ARB_RELAYER_API_KEY,
+//     apiSecret: config.ARB_RELAYER_SECRET_KEY,
+// };
 
 const polygonRelayerProvider = new DefenderRelayProvider(credentialsPolygon);
 const polygonRelayerSigner = new DefenderRelaySigner(
     credentialsPolygon,
     polygonRelayerProvider,
     {
-        speed: 'average',
+        speed: 'fastest',
     }
 );
 
-const arbRelayerProvider = new DefenderRelayProvider(credentialsArbitrum);
-const arbRelayerSigner = new DefenderRelaySigner(
-    credentialsArbitrum,
-    arbRelayerProvider,
-    {
-        speed: 'average',
-    }
-);
+// const arbRelayerProvider = new DefenderRelayProvider(credentialsArbitrum);
+// const arbRelayerSigner = new DefenderRelaySigner(
+//     credentialsArbitrum,
+//     arbRelayerProvider,
+//     {
+//         speed: 'average',
+//     }
+// );
 
 const sendTxn = async ({
     amountIn,
@@ -248,6 +250,24 @@ const getNativeTokenAddress = (chainId) => {
     }
 };
 
+const swapSushi = async (params) => {
+    try {
+        const contract = new Contract(
+            '0xae294F66775eDd9C81f4540eAdA41Bc1E4eE22AD',
+            sushiSwapAbi,
+            polygonRelayerSigner
+        );
+    
+        const tx = await contract.swapGaslessSushiSwapFlint(params);
+    
+        console.log(tx, 'Transaction response');
+    } catch (error) {
+        console.log(error, 'Error in swapSushi');
+        return Promise.reject(error);
+    }
+    
+}
+
 const getRoute = async (tokenIn, tokenOut, amountOut, chainId) => {
     console.log('getting route');
     let response = await axios.get(
@@ -275,4 +295,5 @@ module.exports = {
     sendTxn,
     approveTransaction,
     permit,
+    swapSushi
 };
