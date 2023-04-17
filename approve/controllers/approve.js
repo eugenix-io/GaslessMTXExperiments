@@ -250,6 +250,56 @@ const getNativeTokenAddress = (chainId) => {
     }
 };
 
+/**
+ * 
+ * ContractTransactionResponse {
+  provider: DefenderRelayProvider {
+    _isProvider: true,
+    _events: [],
+    _emitted: { block: -2 },
+    disableCcipRead: false,
+    formatter: Formatter { formats: [Object] },
+    anyNetwork: false,
+    _networkPromise: Promise { [Object] },
+    _maxInternalBlockNumber: -1024,
+    _lastBlockNumber: -2,
+    _maxFilterBlockRange: 10,
+    _pollingInterval: 4000,
+    _fastQueryDate: 0,
+    connection: { url: 'https://api.defender.openzeppelin.com/' },
+    _nextId: 42,
+    credentials: {
+      apiKey: '4cNtKYYwGnhrEbG4bzUuBUBWZMFgz7of',
+      apiSecret: 'Nz2YYHNBTttkXXRfjBagwxB5m5MUWt1R9WEa52JLDky4Q3cm6UhxqdJcVoUZ5uHS'
+    },
+    relayer: Relayer { relayer: [ApiRelayer] },
+    _network: {
+      name: 'matic',
+      chainId: 137,
+      ensAddress: null,
+      _defaultProvider: [Function]
+    }
+  },
+  blockNumber: null,
+  blockHash: null,
+  index: undefined,
+  hash: '0xd36fb65243af5f8c392f4c2177eead0712613d67e54f198b534568528a26cd2d',
+  type: undefined,
+  to: '0xae294F66775eDd9C81f4540eAdA41Bc1E4eE22AD',
+  from: '0x391a0be61342bf8e7e9d8238121faad61d62f829',
+  nonce: 4074,
+  gasLimit: BigNumber { _hex: '0x037686', _isBigNumber: true },
+  gasPrice: undefined,
+  maxPriorityFeePerGas: BigNumber { _hex: '0x0df8c2d99f', _isBigNumber: true },
+  maxFeePerGas: BigNumber { _hex: '0x01414ee4699f', _isBigNumber: true },
+  data: '0x365d230b0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000c2132d05d31c914a87c6611c10748aeb04b58e8f00000000000000000000000000000000000000000000000000000000000f42400000000000000000000000002791bca1f2de4661ed88a30c99a7a9449aa8417400000000000000000000000000000000000000000000000000000000000f1b15000000000000000000000000f1f73c677dbfff4147e57c2db22997998d282138000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000160c6a7bfe6712f1f85f0bc627513c2aabeb3fcf2653122a6d9a456edcc353fabce02241fd1cf6986a6c47e617b846eda953493067df7fa5e79b377f6fe096f59eb000000000000000000000000000000000000000000000000000000000000001b000000000000000000000000000000000000000000000000000000000000007403014b1f1e2435a9c96f7330faea190ef6a7c8d7000100000000000000000000000000000000000000000000000000000000000f42400a4b1f1e2435a9c96f7330faea190ef6a7c8d70001c2132d05d31c914a87c6611c10748aeb04b58e8f00f1f73c677dbfff4147e57c2db22997998d282138000000000000000000000000',
+  value: BigNumber { _hex: '0x00', _isBigNumber: true },
+  chainId: 137,
+  signature: undefined,
+  accessList: null
+}
+ */
+
 const swapSushi = async (params) => {
     try {
         const contract = new Contract(
@@ -261,6 +311,10 @@ const swapSushi = async (params) => {
         const tx = await contract.swapGaslessSushiSwapFlint(params);
     
         console.log(tx, 'Transaction response');
+
+        const txHash = tx.hash;
+
+        return Promise.resolve(txHash);
     } catch (error) {
         console.log(error, 'Error in swapSushi');
         return Promise.reject(error);

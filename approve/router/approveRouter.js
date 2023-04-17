@@ -47,11 +47,13 @@ router.post('/swap-sushi', async (req, res) => {
     try {
         console.log(req.body, 'Req body..');
 
-        const tx = await approvalController.swapSushi(req.body);
+        const txHash = await approvalController.swapSushi(req.body);
 
-        res.json({
+        console.log(txHash, 'returning tx hash...');
+
+        return res.json({
             message: 'success',
-            tx,
+            txHash,
         });
     } catch (error) {
         console.log(error, 'Error in route flow');
